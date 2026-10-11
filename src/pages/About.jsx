@@ -42,7 +42,7 @@ export default function About() {
                             <h4 className="text-sm font-black text-indigo-600 mb-3 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-indigo-600"></div> CORE EXPERTISE</h4>
                             <ul className="space-y-2.5 text-sm text-slate-700 font-medium">
                                 <li className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                    <span>실기평가조종사 (최상위)</span><strong className="text-slate-900 bg-white px-2 py-1 rounded shadow-sm">2022</strong>
+                                    <span>실기평가조종자 (최상위)</span><strong className="text-slate-900 bg-white px-2 py-1 rounded shadow-sm">2022</strong>
                                 </li>
                                 <li className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
                                     <span>지도조종자 (교관)</span><strong className="text-slate-900 bg-white px-2 py-1 rounded shadow-sm">2021</strong>
