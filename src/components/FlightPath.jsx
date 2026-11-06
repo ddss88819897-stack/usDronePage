@@ -4,33 +4,43 @@ import {
 } from 'motion/react';
 
 // 첫 화면 배경: 비행 경로가 그려지고 쿼드콥터가 그 위를 따라 날아와 제자리 비행합니다.
-// 점 사이 간격을 비슷하게 두어야 곡선이 고르게 휘어집니다. 왼쪽 글자 영역(x < 780)은 화면 아래쪽으로만 지나갑니다.
-const POINTS = [
-  [-120, 860], [180, 815], [470, 865], [740, 805], [900, 660],
-  [1010, 480], [1180, 330], [1340, 400], [1330, 600], [1170, 690],
-  [1000, 600], [990, 460], [1100, 440],
-];
-const WAYPOINTS = [3, 6, 8, 10];
+// 경로는 기하학적으로 정확한 도형으로만 이루어집니다.
+//   1) 왼쪽 아래에서 들어오는 3차 베지어 곡선 하나 (글자 영역 아래로 지나감)
+//   2) 오른쪽 빈 공간에서 위로 올라가는 S자: 반지름 R인 반원 두 개를 방향을 바꿔 이어 붙임
+//      (아래 반원은 오른쪽으로, 위 반원은 왼쪽으로 불룩). 접선이 이어지고 선이 서로 겹치지 않습니다.
+const R = 125;
+const A = [1110, 730]; // S자 시작점. 베지어가 수평(오른쪽)으로 도착해 반원의 접선과 맞물립니다
+const START = [-120, 820];
+const CTRL1 = [440, 880];
+const CTRL2 = [860, A[1]];
+const ENTRY = A;
+
+const P = (dx, dy) => `${A[0] + dx},${A[1] + dy}`;
+const ccw = (to) => ` A${R},${R} 0 0 0 ${to}`; // 화면 기준 반시계 사분원
+const cw = (to) => ` A${R},${R} 0 0 1 ${to}`; // 화면 기준 시계 사분원
+const D =
+  `M${START} C${CTRL1} ${CTRL2} ${ENTRY}` +
+  ccw(P(R, -R)) + ccw(P(0, -2 * R)) + // 아래 반원: 오른쪽으로 돌아 위로
+  cw(P(-R, -3 * R)) + cw(P(0, -4 * R)); // 위 반원: 왼쪽으로 돌아 꼭대기에서 정지
+
+// 진입 곡선 길이(수치 적분)와 사분원 길이로 각 지점의 진행률을 정확히 계산합니다
+const bez = (t, i) =>
+  (1 - t) ** 3 * START[i] + 3 * (1 - t) ** 2 * t * CTRL1[i] + 3 * (1 - t) * t ** 2 * CTRL2[i] + t ** 3 * ENTRY[i];
+let ENTRY_LEN = 0;
+for (let k = 1; k <= 400; k++) {
+  const t0 = (k - 1) / 400;
+  const t1 = k / 400;
+  ENTRY_LEN += Math.hypot(bez(t1, 0) - bez(t0, 0), bez(t1, 1) - bez(t0, 1));
+}
+const QUARTER = (Math.PI * R) / 2;
+const TOTAL = ENTRY_LEN + 4 * QUARTER;
+const WAYPOINTS = [
+  [A[0], A[1]], [A[0] + R, A[1] - R], [A[0], A[1] - 2 * R], [A[0] - R, A[1] - 3 * R],
+].map((point, k) => ({ point, at: (ENTRY_LEN + k * QUARTER) / TOTAL }));
 
 // 비행 시간과 속도 곡선: 천천히 출발해 일정하게 날다가 천천히 멈춥니다
-const DURATION = 9;
+const DURATION = 8;
 const FLIGHT_EASE = [0.42, 0, 0.58, 1];
-
-// Catmull-Rom → 베지어 곡선
-function toPath(pts) {
-  let d = `M${pts[0][0]},${pts[0][1]}`;
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[i - 1] || pts[i];
-    const p1 = pts[i];
-    const p2 = pts[i + 1];
-    const p3 = pts[i + 2] || p2;
-    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
-    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
-    d += ` C${c1[0]},${c1[1]} ${c2[0]},${c2[1]} ${p2[0]},${p2[1]}`;
-  }
-  return d;
-}
-const D = toPath(POINTS);
 
 const smoothstep = (a, b, x) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
@@ -54,7 +64,7 @@ function Waypoint({ point, at, progress, n }) {
 export default function FlightPath({ delay = 0.8 }) {
   const pathRef = useRef(null);
   const droneRef = useRef(null);
-  const pos = useRef({ x: POINTS[0][0], y: POINTS[0][1] });
+  const pos = useRef({ x: START[0], y: START[1] });
   const reduce = useReducedMotion();
   const progress = useMotionValue(reduce ? 1 : 0);
 
@@ -80,7 +90,8 @@ export default function FlightPath({ delay = 0.8 }) {
     const a = path.getPointAtLength(Math.max(0, at - 18));
     const b = path.getPointAtLength(Math.min(L, at + 18));
     let target = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI + 90;
-    // 도착할 즈음 기수를 정면(0도)으로 천천히 돌립니다
+    // -180~180도로 맞춘 뒤, 도착할 즈음 기수를 정면(0도)으로 가까운 쪽으로 천천히 돌립니다
+    target = ((((target + 180) % 360) + 360) % 360) - 180;
     target *= 1 - smoothstep(0.86, 1, p);
 
     // 각도가 -180/180을 넘나들 때 한 바퀴 도는 것을 막습니다
@@ -104,8 +115,6 @@ export default function FlightPath({ delay = 0.8 }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progress, reduce, delay]);
 
-  const n = POINTS.length - 1;
-
   return (
     <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <defs>
@@ -118,8 +127,8 @@ export default function FlightPath({ delay = 0.8 }) {
       <path ref={pathRef} d={D} fill="none" stroke="rgba(255,255,255,.12)" strokeWidth="1.2" strokeDasharray="4 8" />
       {/* 지나온 경로 */}
       <motion.path d={D} fill="none" stroke="#4d7fe0" strokeWidth="1.6" strokeOpacity=".8" strokeLinecap="round" style={{ pathLength: progress }} />
-      {WAYPOINTS.map((wi, i) => (
-        <Waypoint key={wi} point={POINTS[wi]} at={wi / n} progress={progress} n={i + 1} />
+      {WAYPOINTS.map((w, i) => (
+        <Waypoint key={i} point={w.point} at={w.at} progress={progress} n={i + 1} />
       ))}
       <g ref={droneRef}>
         <g className="hover-bob">
