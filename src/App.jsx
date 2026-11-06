@@ -4,7 +4,6 @@ import Header from './components/Header';
 import FloatingBar from './components/FloatingBar';
 import Footer from './components/Footer';
 import Cursor from './components/motion/Cursor';
-import { EASE } from './components/motion/config';
 import Home from './pages/Home';
 import About from './pages/About';
 import Curriculum from './pages/Curriculum';
@@ -20,14 +19,14 @@ function Page({ children }) {
       <motion.div
         className="fixed inset-0 z-[150] bg-navy-950 origin-top pointer-events-none"
         initial={{ scaleY: 1 }}
-        animate={{ scaleY: 0, transition: { duration: 0.75, ease: EASE, delay: 0.05 } }}
+        animate={{ scaleY: 0, transition: { duration: 0.95, ease: [0.65, 0, 0.35, 1], delay: 0.05 } }}
         exit={{ scaleY: 0 }}
       />
       <motion.div
         className="fixed inset-0 z-[150] bg-navy-950 origin-bottom pointer-events-none"
         initial={{ scaleY: 0 }}
         animate={{ scaleY: 0 }}
-        exit={{ scaleY: 1, transition: { duration: 0.5, ease: [0.7, 0, 0.3, 1] } }}
+        exit={{ scaleY: 1, transition: { duration: 0.65, ease: [0.65, 0, 0.35, 1] } }}
       />
     </motion.div>
   );

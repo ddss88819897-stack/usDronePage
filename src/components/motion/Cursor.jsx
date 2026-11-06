@@ -7,8 +7,8 @@ export default function Cursor() {
   const desktop = useDesktop();
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
-  const sx = useSpring(x, { stiffness: 500, damping: 40, mass: 0.5 });
-  const sy = useSpring(y, { stiffness: 500, damping: 40, mass: 0.5 });
+  const sx = useSpring(x, { stiffness: 320, damping: 38, mass: 0.6 });
+  const sy = useSpring(y, { stiffness: 320, damping: 38, mass: 0.6 });
   const [state, setState] = useState({ hover: false, label: '', shown: false });
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export default function Cursor() {
       <motion.div
         className="-translate-x-1/2 -translate-y-1/2 rounded-full border border-white flex items-center justify-center"
         animate={{ width: size, height: size, backgroundColor: state.label ? '#f2a414' : 'rgba(242,164,20,0)', borderColor: state.label ? '#f2a414' : '#ffffff' }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 30 }}
       >
         <AnimatePresence>
           {state.label && (

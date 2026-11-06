@@ -1,10 +1,10 @@
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform } from 'motion/react';
+import { motion, useScroll, useTransform, useSpring } from 'motion/react';
 import FlightPath from '../components/FlightPath';
 import SectionHead from '../components/SectionHead';
 import { SplitText, MaskImage, CountUp, Magnetic, Marquee, Stagger, StaggerItem, Reveal, DrawLine, HudCorners } from '../components/motion';
-import { EASE, PAGE_DELAY } from '../components/motion/config';
+import { EASE, PAGE_DELAY, SCROLL_SPRING } from '../components/motion/config';
 import { COURSES, SITE, STATS } from '../site';
 
 const PASSES = [
@@ -35,8 +35,9 @@ const MARQUEE = ['1종 조종자', '2종 조종자', '3종 조종자', '지도�
 function Hero() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
-  const textY = useTransform(scrollYProgress, [0, 1], [0, -120]);
-  const fade = useTransform(scrollYProgress, [0, 0.8], [1, 0.15]);
+  const smooth = useSpring(scrollYProgress, SCROLL_SPRING);
+  const textY = useTransform(smooth, [0, 1], [0, -120]);
+  const fade = useTransform(smooth, [0, 0.8], [1, 0.15]);
   const d = PAGE_DELAY;
 
   return (
@@ -103,37 +104,6 @@ function Hero() {
             <Magnetic><Link to="/curriculum" className="btn-sun w-full sm:w-auto">과정과 교육비 보기 <span className="arrow">→</span></Link></Magnetic>
             <Magnetic><a href={SITE.kakao} target="_blank" rel="noopener noreferrer" className="btn-ghost-dark w-full sm:w-auto">카카오톡 상담하기</a></Magnetic>
           </motion.div>
-        </div>
-
-        <div className="lg:col-span-5">
-          <MaskImage
-            src="/img/festival.jpg"
-            alt="행사장에서 비행을 준비하는 LED 나비 드론"
-            onMount
-            priority
-            parallax
-            delay={d + 0.3}
-            className="aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/5] lg:max-h-[calc(100svh-160px)]"
-          >
-            <HudCorners />
-            <motion.div
-              className="absolute left-6 top-6 z-10 font-mono text-[11px] tracking-[0.14em] text-white flex items-center gap-2"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: d + 1.4 }}
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-red-500 blink" /> REC · FLIGHT LOG
-            </motion.div>
-            <motion.div
-              className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-navy-950/85 to-transparent p-6 pt-16"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: EASE, delay: d + 1.5 }}
-            >
-              <p className="font-mono text-[11px] tracking-[0.14em] text-white/60">LED BUTTERFLY DRONE</p>
-              <p className="mt-1 font-semibold">직접 제작한 나비 드론 공연</p>
-            </motion.div>
-          </MaskImage>
         </div>
       </motion.div>
 

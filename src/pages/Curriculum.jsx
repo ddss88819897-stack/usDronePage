@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'motion/react';
+import { motion, useScroll, useTransform, useSpring } from 'motion/react';
 import PageHead from '../components/PageHead';
 import SectionHead from '../components/SectionHead';
 import { CountUp, Stagger, StaggerItem, Reveal, Magnetic, DrawLine } from '../components/motion';
@@ -27,7 +27,7 @@ const PATH = [COURSES[0], COURSES[3], COURSES[4]];
 function CareerPath() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 80%', 'end 55%'] });
-  const fill = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const fill = useSpring(scrollYProgress, { stiffness: 80, damping: 24, mass: 0.6 });
 
   return (
     <section ref={ref} className="relative bg-navy-950 text-white overflow-hidden">

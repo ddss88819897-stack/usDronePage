@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'motion/react';
+import { motion, useScroll, useSpring } from 'motion/react';
 import SectionHead from '../components/SectionHead';
 import { SplitText, MaskImage, Stagger, StaggerItem, Reveal, HudCorners, DrawLine } from '../components/motion';
 import { EASE, PAGE_DELAY } from '../components/motion/config';
@@ -82,7 +82,7 @@ function TimelineRow({ year, text }) {
 function History() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 55%', 'end 50%'] });
-  const fill = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const fill = useSpring(scrollYProgress, { stiffness: 80, damping: 24, mass: 0.6 });
   return (
     <div ref={ref} className="relative">
       <div className="absolute left-0 top-2 bottom-2 w-px bg-line" />

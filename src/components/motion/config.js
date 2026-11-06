@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 
-export const EASE = [0.16, 1, 0.3, 1];
+// 부드럽게 감속하는 곡선 (처음에 확 튀어나가지 않도록 easeOutCubic 계열)
+export const EASE = [0.33, 1, 0.68, 1];
+// 스크롤에 붙는 움직임을 부드럽게 따라가게 하는 스프링
+export const SCROLL_SPRING = { stiffness: 90, damping: 26, mass: 0.6 };
 // 페이지 전환 커튼이 걷히는 동안 기다리는 시간
-export const PAGE_DELAY = 0.55;
+export const PAGE_DELAY = 0.7;
 export const VIEW = { once: true, margin: '0px 0px -12% 0px' };
 
 // 화면 크기·포인터 조건 (데스크탑에서만 켜는 효과용)

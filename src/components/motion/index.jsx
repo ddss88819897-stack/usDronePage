@@ -3,7 +3,7 @@ import {
   motion, useInView, useMotionValue, useTransform, animate, useScroll,
   useSpring, useReducedMotion,
 } from 'motion/react';
-import { EASE, VIEW, useDesktop } from './config';
+import { EASE, VIEW, SCROLL_SPRING, useDesktop } from './config';
 
 /* 화면에 들어오면 한 번 떠오름 */
 export function Reveal({ as = 'div', delay = 0, y = 28, x = 0, className, children, ...rest }) {
@@ -14,7 +14,7 @@ export function Reveal({ as = 'div', delay = 0, y = 28, x = 0, className, childr
       initial={{ opacity: 0, y, x }}
       whileInView={{ opacity: 1, y: 0, x: 0 }}
       viewport={VIEW}
-      transition={{ duration: 0.9, ease: EASE, delay }}
+      transition={{ duration: 1.1, ease: EASE, delay }}
       {...rest}
     >
       {children}
@@ -45,7 +45,7 @@ export function StaggerItem({ as = 'div', y = 24, className, children, ...rest }
       className={className}
       variants={{
         hidden: { opacity: 0, y },
-        show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: EASE } },
+        show: { opacity: 1, y: 0, transition: { duration: 1.05, ease: EASE } },
       }}
       {...rest}
     >
@@ -61,7 +61,7 @@ export function SplitText({ as = 'h2', lines, mode = 'line', delay = 0, onMount 
   const trigger = onMount
     ? { initial: 'hidden', animate: 'show' }
     : { initial: 'hidden', whileInView: 'show', viewport: VIEW };
-  const step = mode === 'char' ? 0.028 : 0.12;
+  const step = mode === 'char' ? 0.035 : 0.14;
   let i = 0;
 
   return (
@@ -71,7 +71,7 @@ export function SplitText({ as = 'h2', lines, mode = 'line', delay = 0, onMount 
           {mode === 'line' ? (
             <motion.span
               className="block"
-              variants={{ hidden: { y: '110%' }, show: { y: 0, transition: { duration: 1, ease: EASE, delay: delay + li * step } } }}
+              variants={{ hidden: { y: '110%' }, show: { y: 0, transition: { duration: 1.2, ease: EASE, delay: delay + li * step } } }}
             >
               {line.map(([t, c], si) => <span key={si} className={c}>{t}</span>)}
             </motion.span>
@@ -91,7 +91,7 @@ export function SplitText({ as = 'h2', lines, mode = 'line', delay = 0, onMount 
                             className="inline-block"
                             variants={{
                               hidden: { y: '110%', opacity: 0 },
-                              show: { y: 0, opacity: 1, transition: { duration: 0.9, ease: EASE, delay: d } },
+                              show: { y: 0, opacity: 1, transition: { duration: 1.1, ease: EASE, delay: d } },
                             }}
                           >
                             {ch}
@@ -122,7 +122,8 @@ export function MaskImage({ src, alt, from = 'up', parallax = false, delay = 0, 
   const desktop = useDesktop();
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
-  const y = useTransform(scrollYProgress, [0, 1], ['-7%', '7%']);
+  const smooth = useSpring(scrollYProgress, SCROLL_SPRING);
+  const y = useTransform(smooth, [0, 1], ['-7%', '7%']);
   const on = parallax && desktop && !reduce;
   const trigger = onMount ? { animate: 'show' } : { whileInView: 'show', viewport: VIEW };
 
@@ -134,7 +135,7 @@ export function MaskImage({ src, alt, from = 'up', parallax = false, delay = 0, 
         {...trigger}
         variants={{
           hidden: { clipPath: CLIP[from] },
-          show: { clipPath: 'inset(0% 0% 0% 0%)', transition: { duration: 1.3, ease: EASE, delay } },
+          show: { clipPath: 'inset(0% 0% 0% 0%)', transition: { duration: 1.6, ease: EASE, delay } },
         }}
       >
         <motion.div className={`absolute inset-x-0 ${on ? '-top-[8%] h-[116%]' : 'inset-y-0'}`} style={on ? { y } : undefined}>
@@ -145,8 +146,8 @@ export function MaskImage({ src, alt, from = 'up', parallax = false, delay = 0, 
             fetchPriority={priority ? 'high' : undefined}
             className={`h-full w-full object-cover ${imgClass}`}
             variants={{
-              hidden: { scale: 1.18 },
-              show: { scale: 1, transition: { duration: 1.8, ease: EASE, delay } },
+              hidden: { scale: 1.12 },
+              show: { scale: 1, transition: { duration: 2.2, ease: EASE, delay } },
             }}
           />
         </motion.div>
@@ -157,7 +158,7 @@ export function MaskImage({ src, alt, from = 'up', parallax = false, delay = 0, 
 }
 
 /* 숫자 카운트업 */
-export function CountUp({ to, from = 0, duration = 1.8, delay = 0, format, className }) {
+export function CountUp({ to, from = 0, duration = 2.2, delay = 0, format, className }) {
   const ref = useRef(null);
   const inView = useInView(ref, VIEW);
   const reduce = useReducedMotion();
@@ -180,7 +181,7 @@ export function DrawLine({ className = 'bg-ink', delay = 0, vertical = false }) 
       initial={vertical ? { scaleY: 0 } : { scaleX: 0 }}
       whileInView={vertical ? { scaleY: 1 } : { scaleX: 1 }}
       viewport={VIEW}
-      transition={{ duration: 1.2, ease: EASE, delay }}
+      transition={{ duration: 1.5, ease: EASE, delay }}
     />
   );
 }
@@ -208,8 +209,8 @@ export function Marquee({ items, className = '' }) {
 export function Magnetic({ children, strength = 0.28, className = '' }) {
   const ref = useRef(null);
   const desktop = useDesktop();
-  const x = useSpring(0, { stiffness: 220, damping: 16, mass: 0.4 });
-  const y = useSpring(0, { stiffness: 220, damping: 16, mass: 0.4 });
+  const x = useSpring(0, { stiffness: 140, damping: 20, mass: 0.6 });
+  const y = useSpring(0, { stiffness: 140, damping: 20, mass: 0.6 });
   const move = (e) => {
     if (!desktop) return;
     const r = ref.current.getBoundingClientRect();
