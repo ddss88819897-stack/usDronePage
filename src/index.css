@@ -1,36 +1,74 @@
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Pretendard', sans-serif;
-  background-color: #f8fafc;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
+@layer base {
+  body {
+    @apply bg-mist text-ink font-sans antialiased;
+    overflow-x: hidden;
+    word-break: keep-all;
+  }
+  h1, h2, h3 { letter-spacing: -0.035em; }
+  ::selection { background: #f2a41466; }
 }
 
-/* 고급 스크롤 & 플로팅 모션 */
-.reveal { opacity: 0; transform: translateY(30px); transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
-.reveal.active { opacity: 1; transform: translateY(0); }
-.delay-100 { transition-delay: 100ms; }
-.delay-200 { transition-delay: 200ms; }
-.delay-300 { transition-delay: 300ms; }
+@layer components {
+  .wrap { @apply mx-auto w-full max-w-wrap px-4 sm:px-6 lg:px-8; }
 
-/* 무한 롤링 (명예의 전당) */
-.marquee-wrapper { overflow: hidden; white-space: nowrap; position: relative; background: #ffffff; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
-.marquee-content { animation: marquee 35s linear infinite; }
-@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+  /* 모노 라벨: "01 — LICENSE TRAINING" */
+  .eyebrow { @apply font-mono text-[12px] sm:text-[13px] font-medium uppercase tracking-[0.14em] text-muted; }
+  .eyebrow-dark { @apply eyebrow text-white/50; }
+  .num { font-variant-numeric: tabular-nums; }
 
-/* 배경 영상 세팅 */
-.video-bg-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 0; }
-.video-bg-container video { min-width: 100%; min-height: 100%; object-fit: cover; opacity: 0.15; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  /* 버튼 */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 h-12 px-6 rounded text-[15px] font-semibold whitespace-nowrap;
+    transition: background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s ease;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { @apply btn bg-brand text-white hover:bg-[#2457bb]; }
+  .btn-sun { @apply btn bg-sun text-navy-950 hover:bg-[#ffb627]; }
+  .btn-ghost { @apply btn border border-ink/20 text-ink hover:border-ink hover:bg-ink hover:text-white; }
+  .btn-ghost-dark { @apply btn border border-white/25 text-white hover:border-white hover:bg-white hover:text-navy-950; }
+  .btn-kakao { @apply btn bg-[#FEE500] text-[#191600] hover:bg-[#f5d800]; }
+  .btn .arrow { transition: transform .25s ease; }
+  .btn:hover .arrow { transform: translateX(4px); }
 
-/* 탭 액티브 스타일 */
-.nav-btn.active { color: #0f172a; font-weight: 900; }
-.nav-btn.active::after { content: ''; position: absolute; bottom: -8px; left: 0; width: 100%; height: 2px; background-color: #0f172a; }
+  /* 밑줄이 그려지는 링크 */
+  .link {
+    background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1px;
+    transition: background-size .3s ease;
+    padding-bottom: 2px;
+  }
+  .link:hover, .link.is-active { background-size: 100% 1px; }
 
-/* 글래스 카드 엣지 하이라이트 */
-.glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 10px 40px rgba(15, 23, 42, 0.04); }
+  /* 다크 영역 격자 */
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
 
+  /* 흐르는 텍스트 띠 */
+  .marquee { overflow: hidden; }
+  .marquee-track { display: flex; width: max-content; animation: marquee 40s linear infinite; }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+
+  /* 로터 회전, 제자리 비행 */
+  .rotor { transform-box: fill-box; transform-origin: center; animation: spin .18s linear infinite; }
+  .hover-bob { transform-box: fill-box; animation: bob 2.8s ease-in-out infinite; }
+}
+
+@keyframes marquee { to { transform: translateX(-50%); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes blink { 50% { opacity: .2; } }
+.blink { animation: blink 1.6s steps(1) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: 0s !important; }
+}

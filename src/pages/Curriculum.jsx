@@ -1,46 +1,172 @@
+import { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'motion/react';
+import PageHead from '../components/PageHead';
+import SectionHead from '../components/SectionHead';
+import { CountUp, Stagger, StaggerItem, Reveal, Magnetic, DrawLine } from '../components/motion';
+import { EASE } from '../components/motion/config';
+import { COURSES, SITE } from '../site';
+
+const PACKAGES = [
+  {
+    for: '공인중개사·개발업자',
+    en: 'Real Estate Aerial',
+    title: '부동산 항공촬영 실무반',
+    body: '자격증 취득과 함께 토지 임장, 매물 홍보용 항공 촬영, 짧은 홍보 영상 편집까지 실습합니다.',
+  },
+  {
+    for: '입대 예정자',
+    en: 'Military Track',
+    title: '육군 드론병·부사관 준비반',
+    body: '1종 자격 취득에 더해 부대에서 쓰는 비행 방식을 연습하고, 드론병 출신 원장이 면접과 복무를 미리 알려드립니다.',
+  },
+];
+
+// 자격 단계: 1종 → 지도조종자 → 실기평가조종자
+const PATH = [COURSES[0], COURSES[3], COURSES[4]];
+
+function CareerPath() {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 80%', 'end 55%'] });
+  const fill = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+  return (
+    <section ref={ref} className="relative bg-navy-950 text-white overflow-hidden">
+      <div className="absolute inset-0 grid-bg opacity-60" />
+      <div className="relative wrap py-20 sm:py-28">
+        <SectionHead
+          dark
+          no="02"
+          en="Career Path"
+          title={['1종에서 실기평가조종자까지', '단계별로 올라갑니다']}
+          lede="지도조종자는 1종 자격을, 실기평가조종자는 지도조종자 자격을 먼저 갖춰야 합니다. 한 곳에서 다음 단계까지 이어서 준비할 수 있습니다."
+        />
+        <div className="relative grid md:grid-cols-3 gap-10 md:gap-6">
+          {/* 진행선 */}
+          <div className="absolute left-[11px] top-3 bottom-3 w-px bg-white/15 md:left-3 md:right-3 md:top-[11px] md:bottom-auto md:h-px md:w-auto" />
+          <motion.div
+            className="absolute left-[11px] top-3 bottom-3 w-px bg-sun origin-top md:hidden"
+            style={{ scaleY: fill }}
+          />
+          <motion.div
+            className="hidden md:block absolute left-3 right-3 top-[11px] h-px bg-sun origin-left"
+            style={{ scaleX: fill }}
+          />
+          {PATH.map((c, i) => {
+            const at = i / (PATH.length - 1);
+            return <Step key={c.name} c={c} i={i} at={at} progress={fill} />;
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Step({ c, i, at, progress }) {
+  const lit = useTransform(progress, [Math.max(0, at - 0.05), at], [0, 1]);
+  const bg = useTransform(lit, [0, 1], ['#060f24', '#f2a414']);
+  const border = useTransform(lit, [0, 1], ['rgba(255,255,255,.35)', '#f2a414']);
+  return (
+    <div className="relative pl-12 md:pl-0 md:pt-12">
+      <motion.span
+        className="absolute left-0 top-0 h-6 w-6 rounded-full border-2"
+        style={{ backgroundColor: bg, borderColor: border }}
+      />
+      <Reveal delay={i * 0.12}>
+        <p className="font-mono text-[11px] tracking-[0.14em] text-sun">STEP {String(i + 1).padStart(2, '0')}</p>
+        <h3 className="mt-2 text-[24px] sm:text-[28px] font-bold">{c.name}</h3>
+        <p className="mt-2 text-[15px] text-white/60">{c.note}</p>
+        <p className="mt-5 font-mono text-[13px] text-white/80">FLIGHT {c.hours}H · <CountUp to={c.price / 10000} />만원</p>
+      </Reveal>
+    </div>
+  );
+}
+
 export default function Curriculum() {
-    return (
-      <section className="py-24 px-4 max-w-6xl mx-auto space-y-16">
-        <div className="text-center space-y-4 reveal">
-            <span className="text-indigo-600 font-black text-xs uppercase tracking-[0.2em] px-4 py-1.5 rounded-full border border-indigo-200 bg-indigo-50">License & VIP Class</span>
-            <h2 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight">국가자격 및 특화과정</h2>
+  return (
+    <>
+      <PageHead no="01" en="License Training" title={['드론 국가자격 과정과', '교육비']}>
+        모든 과정은 원장이 1:1로 가르칩니다. 교육비는 부가세를 포함한 금액입니다.
+      </PageHead>
+
+      <section className="wrap py-16 sm:py-24">
+        <SectionHead no="01" en="Tuition" title={['정규 과정 교육비']} />
+        <div className="hidden md:grid grid-cols-12 gap-6 pb-3 font-mono text-[11px] tracking-[0.14em] text-muted">
+          <span className="col-span-1">NO.</span>
+          <span className="col-span-5">COURSE</span>
+          <span className="col-span-2">FLIGHT</span>
+          <span className="col-span-4 text-right">TUITION (VAT 포함)</span>
         </div>
-  
-        <div className="reveal">
-            <h3 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3"><div className="w-2 h-8 bg-slate-900 rounded-full"></div>국가자격증 정규 과정</h3>
-            <div className="bg-white border border-slate-200 rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.03)] overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[700px]">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 text-sm font-bold tracking-tight">
-                        <tr><th className="p-6">자격종류</th><th className="p-6 text-center">비행시간</th><th className="p-6 text-right">교육비 (VAT 포함)</th></tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-700">
-                        <tr className="hover:bg-slate-50/80 transition-colors"><td className="p-6 font-black text-slate-900 text-lg">1종 정규반</td><td className="p-6 text-center font-bold">20시간</td><td className="p-6 text-right font-black text-slate-900 text-2xl">2,000,000<span className="text-sm font-medium text-slate-400 ml-1">원</span></td></tr>
-                        <tr className="hover:bg-slate-50/80 transition-colors"><td className="p-6 font-black text-slate-700 text-lg">2종 정규반</td><td className="p-6 text-center font-bold">10시간</td><td className="p-6 text-right font-black text-slate-900 text-2xl">1,500,000<span className="text-sm font-medium text-slate-400 ml-1">원</span></td></tr>
-                        <tr className="hover:bg-slate-50/80 transition-colors"><td className="p-6 font-black text-slate-700 text-lg">3종 정규반</td><td className="p-6 text-center font-bold">6시간</td><td className="p-6 text-right font-black text-slate-900 text-2xl">500,000<span className="text-sm font-medium text-slate-400 ml-1">원</span></td></tr>
-                        <tr className="hover:bg-indigo-50/30 transition-colors"><td className="p-6 font-black text-indigo-700 text-lg">지도조종자(교관)</td><td className="p-6 text-center font-bold">100시간</td><td className="p-6 text-right font-black text-indigo-700 text-2xl">3,000,000<span className="text-sm font-medium text-indigo-400 ml-1">원</span></td></tr>
-                        <tr className="hover:bg-indigo-50/30 transition-colors"><td className="p-6 font-black text-indigo-900 text-lg">실기평가조종사</td><td className="p-6 text-center font-bold">150시간</td><td className="p-6 text-right font-black text-indigo-900 text-2xl">5,000,000<span className="text-sm font-medium text-indigo-400 ml-1">원</span></td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-  
-        <div className="reveal delay-100 pt-8">
-            <h3 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3"><div className="w-2 h-8 bg-amber-500 rounded-full"></div>VIP 실무 특화 패키지</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white border border-slate-200 p-8 rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.03)] relative overflow-hidden group hover:border-amber-400 transition-colors">
-                    <span className="bg-amber-500 text-white text-xs font-black px-3 py-1.5 rounded-lg mb-4 inline-block tracking-wider">공인중개사·개발업자 추천</span>
-                    <h4 className="text-2xl font-black text-slate-900 mb-3">부동산 항공촬영 마스터</h4>
-                    <p className="text-slate-500 text-sm leading-relaxed mb-8 font-medium">자격증 취득부터 토지 임장, 매물 홍보용 고퀄리티 항공 촬영 실습과 트렌디한 영상 편집 노하우를 한 번에 마스터하는 프리미엄 실무 패키지.</p>
-                    <div className="pt-5 border-t border-slate-100"><p className="text-slate-900 font-black">수강료 : 맞춤 상담 후 설계</p></div>
-                </div>
-                <div className="bg-slate-900 border border-slate-800 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden group hover:border-indigo-500 transition-colors">
-                    <span className="bg-indigo-600 text-white text-xs font-black px-3 py-1.5 rounded-lg mb-4 inline-block tracking-wider">입대 예정자 필수 코스</span>
-                    <h4 className="text-2xl font-black text-white mb-3">육군 드론병/부사관 원패스</h4>
-                    <p className="text-slate-400 text-sm leading-relaxed mb-8 font-medium">국가자격증(1종) 취득은 기본. 군 부대 실전 전술 비행 숙달과 드론병 출신 대표의 면접 및 자대 배치 핵심 꿀팁 밀착 멘토링.</p>
-                    <div className="pt-5 border-t border-slate-800"><p className="text-white font-black">수강료 : 맞춤 상담 후 설계</p></div>
-                </div>
-            </div>
-        </div>
+        <DrawLine className="bg-ink" />
+        <Stagger as="ul" gap={0.09}>
+          {COURSES.map((c, i) => (
+            <StaggerItem
+              as="li"
+              key={c.name}
+              className="group relative grid grid-cols-2 md:grid-cols-12 gap-x-6 gap-y-1 py-7 sm:py-8 border-b border-line transition-colors duration-300 hover:bg-white"
+            >
+              <span className="absolute left-0 top-0 bottom-0 w-[3px] origin-top scale-y-0 bg-sun transition-transform duration-500 group-hover:scale-y-100" />
+              <span className="hidden md:block md:col-span-1 self-center pl-4 font-mono text-[13px] text-muted">{String(i + 1).padStart(2, '0')}</span>
+              <div className="col-span-2 md:col-span-5 md:pl-0 pl-4 transition-transform duration-500 group-hover:translate-x-2">
+                <p className="text-[20px] sm:text-[24px] font-bold tracking-tight">{c.name}</p>
+                <p className="mt-1 text-[14px] sm:text-[15px] text-muted">{c.note}</p>
+              </div>
+              <p className="pl-4 md:pl-0 md:col-span-2 self-center font-mono text-[14px] sm:text-[15px] mt-3 md:mt-0">{c.hours}H</p>
+              <p className="md:col-span-4 self-center text-right pr-4 text-[22px] sm:text-[32px] font-bold tracking-tight mt-3 md:mt-0">
+                <CountUp to={c.price} duration={1.6} />
+                <span className="ml-1 text-[15px] font-medium text-muted">원</span>
+              </p>
+            </StaggerItem>
+          ))}
+        </Stagger>
       </section>
-    );
-  }
+
+      <CareerPath />
+
+      <section className="wrap py-20 sm:py-28">
+        <SectionHead
+          no="03"
+          en="Special Programs"
+          title={['목적에 맞춘 실무 과정']}
+          lede="자격증 이후에 할 일이 정해져 있다면, 그 일에 맞춰 수업을 짭니다. 교육비는 상담 후 정합니다."
+        />
+        <Stagger className="grid md:grid-cols-2 gap-4 sm:gap-5" gap={0.15}>
+          {PACKAGES.map((p, i) => (
+            <StaggerItem key={p.title} y={50}>
+              <article className={`group relative h-full flex flex-col overflow-hidden p-8 sm:p-12 border transition-colors duration-500 ${i === 1 ? 'bg-navy-950 text-white border-navy-950' : 'bg-white border-line hover:border-navy-950'}`}>
+                <motion.span
+                  className={`absolute -right-16 -top-16 h-56 w-56 rounded-full blur-3xl ${i === 1 ? 'bg-brand/40' : 'bg-sun/15'}`}
+                  animate={{ scale: [1, 1.15, 1] }}
+                  transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                />
+                <p className={`relative font-mono text-[11px] tracking-[0.14em] ${i === 1 ? 'text-sun' : 'text-brand'}`}>{p.en.toUpperCase()}</p>
+                <p className={`relative mt-6 text-[14px] font-semibold ${i === 1 ? 'text-white/60' : 'text-muted'}`}>{p.for} 추천</p>
+                <h3 className="relative mt-2 text-[26px] sm:text-[32px] font-bold leading-snug">{p.title}</h3>
+                <p className={`relative mt-4 text-[16px] leading-relaxed ${i === 1 ? 'text-white/65' : 'text-muted'}`}>{p.body}</p>
+                <div className="relative mt-auto pt-10">
+                  <Magnetic>
+                    <a href={SITE.kakao} target="_blank" rel="noopener noreferrer" className={i === 1 ? 'btn-sun' : 'btn-primary'}>
+                      이 과정 상담하기 <span className="arrow">→</span>
+                    </a>
+                  </Magnetic>
+                </div>
+              </article>
+            </StaggerItem>
+          ))}
+        </Stagger>
+        <Reveal delay={0.2} className="mt-14 flex flex-col sm:flex-row sm:items-center justify-between gap-5 border-t border-line pt-8">
+          <p className="text-[17px]"><span className="font-semibold">어떤 종이 맞는지 모르겠다면,</span> <span className="text-muted">하려는 일과 쓰려는 기체를 알려주세요.</span></p>
+          <motion.a
+            href={SITE.kakao}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-kakao shrink-0"
+            whileHover={{ scale: 1.03 }}
+            transition={{ ease: EASE }}
+          >
+            카카오톡으로 묻기
+          </motion.a>
+        </Reveal>
+      </section>
+    </>
+  );
+}

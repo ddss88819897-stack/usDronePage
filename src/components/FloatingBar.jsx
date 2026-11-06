@@ -1,15 +1,25 @@
-export default function FloatingBar() {
-    return (
-      <div className="fixed bottom-4 left-4 right-4 sm:bottom-6 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-[80] flex flex-row gap-2 bg-slate-900 p-2.5 rounded-2xl shadow-2xl">
-  
-  <a href="tel:0507-1496-3541" className="flex-1 sm:flex-none flex items-center justify-center px-1 sm:px-6 py-3.5 bg-white text-slate-900 text-[11px] sm:text-sm font-black rounded-xl whitespace-nowrap transition-transform active:scale-95">
-    📞 전화 <span className="hidden sm:inline ml-1">문의 </span>(0507-1496-3541)
-  </a>
-  
-  <a href="http://pf.kakao.com/_ZaxiFX" target="_blank" rel="noopener noreferrer" className="flex-1 sm:flex-none flex items-center justify-center px-1 sm:px-6 py-3.5 bg-[#FEE500] text-black text-[12px] sm:text-sm font-black rounded-xl whitespace-nowrap transition-transform active:scale-95">
-    💬 카카오톡 상담
-  </a>
+import { useState } from 'react';
+import { motion, useScroll, useMotionValueEvent } from 'motion/react';
+import { SITE } from '../site';
+import { EASE } from './motion/config';
 
-</div>
-    );  
-  }
+// 모바일 하단 상담 바. 첫 화면을 지나면 아래에서 올라옵니다.
+export default function FloatingBar() {
+  const { scrollY } = useScroll();
+  const [shown, setShown] = useState(false);
+  useMotionValueEvent(scrollY, 'change', (v) => setShown(v > 320));
+
+  return (
+    <motion.div
+      className="lg:hidden fixed inset-x-0 bottom-0 z-[80] border-t border-white/10 bg-navy-950/95 backdrop-blur px-3 pt-2.5 pb-[calc(10px+env(safe-area-inset-bottom))]"
+      initial={false}
+      animate={{ y: shown ? 0 : '110%' }}
+      transition={{ duration: 0.5, ease: EASE }}
+    >
+      <div className="grid grid-cols-2 gap-2">
+        <a href={`tel:${SITE.phone}`} className="btn-ghost-dark h-12 text-[15px]">전화 문의</a>
+        <a href={SITE.kakao} target="_blank" rel="noopener noreferrer" className="btn-kakao h-12 text-[15px]">카카오톡 상담</a>
+      </div>
+    </motion.div>
+  );
+}
