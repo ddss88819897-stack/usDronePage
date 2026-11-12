@@ -1,5 +1,4 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -13,14 +12,13 @@
   }
   h1, h2, h3 { letter-spacing: -0.035em; }
   ::selection { background: #f2a41466; }
+  :focus-visible { outline: 2px solid #f2a414; outline-offset: 3px; border-radius: 2px; }
+  summary:focus-visible { outline-offset: -2px; }
 }
 
 @layer components {
   .wrap { @apply mx-auto w-full max-w-wrap px-4 sm:px-6 lg:px-8; }
 
-  /* 모노 라벨: "01 — LICENSE TRAINING" */
-  .eyebrow { @apply font-mono text-[12px] sm:text-[13px] font-medium uppercase tracking-[0.14em] text-muted; }
-  .eyebrow-dark { @apply eyebrow text-white/50; }
   .num { font-variant-numeric: tabular-nums; }
 
   /* 버튼 */
@@ -45,25 +43,11 @@
   }
   .link:hover, .link.is-active { background-size: 100% 1px; }
 
-  /* 다크 영역 격자 */
-  .grid-bg {
-    background-image:
-      linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
-    background-size: 64px 64px;
-  }
-
-  /* 흐르는 텍스트 띠 */
-  .marquee { overflow: hidden; }
-  .marquee-track { display: flex; width: max-content; animation: marquee 40s linear infinite; }
-  .marquee:hover .marquee-track { animation-play-state: paused; }
-
   /* 로터 회전, 제자리 비행 */
   .rotor { transform-box: fill-box; transform-origin: center; animation: spin .18s linear infinite; }
   .hover-bob { transform-box: fill-box; animation: bob 2.8s ease-in-out infinite; }
 }
 
-@keyframes marquee { to { transform: translateX(-50%); } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 @keyframes blink { 50% { opacity: .2; } }

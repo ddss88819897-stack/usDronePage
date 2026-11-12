@@ -1,27 +1,30 @@
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import PageHead from '../components/PageHead';
-import { Stagger, StaggerItem, Reveal, Magnetic, HudCorners, DrawLine } from '../components/motion';
-import { EASE } from '../components/motion/config';
+import KakaoButton from '../components/KakaoButton';
+import { HudCorners, Arrow } from '../components/motion';
 import { SITE } from '../site';
+
+const MAP_LINK = `https://map.kakao.com/link/search/${encodeURIComponent(SITE.address)}`;
 
 export default function Location() {
   const address = SITE.address;
   const [copied, setCopied] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
 
   const copy = () => {
-    navigator.clipboard.writeText(address).then(() => {
+    navigator.clipboard?.writeText(address).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2200);
-    });
+    }).catch(() => {});
   };
 
   useEffect(() => {
+    let alive = true;
     const initMap = () => {
       if (!(window.kakao && window.kakao.maps)) return;
       window.kakao.maps.load(() => {
         const container = document.getElementById('map');
-        if (!container) return;
+        if (!container || !alive) return;
         container.innerHTML = '';
         // 주소 검색이 실패할 때 쓰는 기본 위치
         const fallback = new window.kakao.maps.LatLng(35.601725, 129.208365);
@@ -38,6 +41,7 @@ export default function Location() {
         } else {
           place(fallback);
         }
+        setMapReady(true);
       });
     };
 
@@ -49,100 +53,70 @@ export default function Location() {
       script.src = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=2631e25567e1c8672851a975a66b1fae&autoload=false&libraries=services';
       script.async = true;
       script.onload = initMap;
+      // 실패하면 아래의 주소 카드가 그대로 보입니다
+      script.onerror = () => {};
       document.head.appendChild(script);
     } else {
       initMap();
     }
+    return () => { alive = false; };
   }, [address]);
 
   const rows = [
-    ['ADDRESS', '주소', (
+    ['주소', (
       <span key="a" className="flex flex-wrap items-center gap-x-3 gap-y-1">
         {address}
-        <button onClick={copy} className="relative inline-flex items-center gap-1.5 text-[14px] font-semibold text-brand">
-          <AnimatePresence mode="wait" initial={false}>
-            {copied ? (
-              <motion.svg key="ok" width="16" height="16" viewBox="0 0 16 16" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
-                <motion.path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                  initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.4, ease: EASE }} />
-              </motion.svg>
-            ) : (
-              <motion.svg key="copy" width="16" height="16" viewBox="0 0 16 16" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
-                <rect x="5" y="5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                <path d="M3 10.5V4a1 1 0 011-1h6.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-              </motion.svg>
-            )}
-          </AnimatePresence>
+        <button type="button" onClick={copy} className="text-[14px] font-semibold text-brand">
           <span className="link">{copied ? '복사했습니다' : '주소 복사'}</span>
         </button>
       </span>
     )],
-    ['PHONE', '전화', <a key="p" href={`tel:${SITE.phone}`} className="num link">{SITE.phone}</a>],
-    ['CLASS', '수업', '예약제로 운영합니다. 방문 전에 연락 주세요.'],
+    ['전화', <a key="p" href={`tel:${SITE.phone}`} className="num link">{SITE.phone}</a>],
+    ['수업', '예약제로 운영합니다. 방문 전에 연락 주세요.'],
   ];
 
   return (
     <>
-      <PageHead no="05" en="Location" title={['울산드론아카데미', '전용 교육장']}>
+      <PageHead title={['울산드론아카데미', '전용 교육장']}>
         울산 울주군 범서읍에 있습니다. 실기 수업과 상담은 모두 예약 후 진행합니다.
       </PageHead>
 
       <section className="wrap py-16 sm:py-24 grid lg:grid-cols-12 gap-12 lg:gap-14">
         <div className="lg:col-span-5 flex flex-col">
-          <Reveal as="p" className="eyebrow mb-4">Information</Reveal>
-          <DrawLine className="bg-ink" />
-          <Stagger as="dl" className="text-[16px]" gap={0.1}>
-            {rows.map(([en, ko, val]) => (
-              <StaggerItem key={en} className="grid grid-cols-[92px_1fr] gap-4 py-5 border-b border-line">
-                <dt>
-                  <span className="block font-mono text-[11px] tracking-[0.14em] text-muted">{en}</span>
-                  <span className="text-[14px] text-muted">{ko}</span>
-                </dt>
-                <dd className="pt-0.5">{val}</dd>
-              </StaggerItem>
+          <dl className="border-t border-ink text-[16px]">
+            {rows.map(([label, val]) => (
+              <div key={label} className="grid grid-cols-[64px_1fr] gap-4 py-5 border-b border-line">
+                <dt className="text-[15px] font-semibold text-muted">{label}</dt>
+                <dd>{val}</dd>
+              </div>
             ))}
-          </Stagger>
-          <Reveal delay={0.3} className="mt-10 flex flex-col sm:flex-row gap-3">
-            <Magnetic>
-              <a href={`https://map.kakao.com/link/search/${encodeURIComponent(address)}`} target="_blank" rel="noopener noreferrer" className="btn-primary">
-                카카오맵에서 길찾기 <span className="arrow">→</span>
-              </a>
-            </Magnetic>
-            <Magnetic><a href={SITE.kakao} target="_blank" rel="noopener noreferrer" className="btn-ghost">카카오톡 상담</a></Magnetic>
-          </Reveal>
+          </dl>
+          <div className="mt-10 flex flex-col sm:flex-row gap-3">
+            <a href={MAP_LINK} target="_blank" rel="noopener noreferrer" className="btn-primary">
+              카카오맵에서 열기 <Arrow />
+            </a>
+            <KakaoButton />
+          </div>
+          <p role="status" aria-live="polite" className="sr-only">{copied ? '주소를 복사했습니다' : ''}</p>
         </div>
 
         <div className="lg:col-span-7">
-          <motion.div
-            className="relative h-[380px] sm:h-[480px] lg:h-full lg:min-h-[560px] bg-line overflow-hidden"
-            initial={{ clipPath: 'inset(0% 0% 100% 0%)' }}
-            whileInView={{ clipPath: 'inset(0% 0% 0% 0%)' }}
-            viewport={{ once: true, margin: '0px 0px -10% 0px' }}
-            transition={{ duration: 1.3, ease: EASE }}
-          >
-            <div id="map" className="absolute inset-0" />
+          <div className="relative h-[380px] sm:h-[480px] lg:h-full lg:min-h-[560px] bg-white border border-line overflow-hidden">
+            {/* 지도가 안 뜰 때도 보이는 기본 카드 */}
+            {!mapReady && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8 text-center">
+                <p className="text-[20px] sm:text-[24px] font-bold">{address}</p>
+                <p className="text-[15px] text-muted">지도를 불러오지 못하면 카카오맵에서 바로 확인하세요.</p>
+                <a href={MAP_LINK} target="_blank" rel="noopener noreferrer" className="btn-ghost">
+                  카카오맵에서 열기 <Arrow />
+                </a>
+              </div>
+            )}
+            <div id="map" className={`absolute inset-0 ${mapReady ? '' : 'hidden'}`} />
             <HudCorners className="border-navy-950/70" />
-            <div className="pointer-events-none absolute left-5 top-5 z-10 bg-navy-950 text-white font-mono text-[11px] tracking-[0.14em] px-3 py-1.5">
-              ULSAN DRONE ACADEMY
-            </div>
-          </motion.div>
+          </div>
         </div>
       </section>
-
-      {/* 복사 알림 */}
-      <AnimatePresence>
-        {copied && (
-          <motion.div
-            className="fixed left-1/2 bottom-24 lg:bottom-10 z-[120] bg-navy-950 text-white text-[14px] font-medium px-5 py-3 rounded shadow-xl"
-            initial={{ opacity: 0, y: 20, x: '-50%' }}
-            animate={{ opacity: 1, y: 0, x: '-50%' }}
-            exit={{ opacity: 0, y: 20, x: '-50%' }}
-            transition={{ duration: 0.4, ease: EASE }}
-          >
-            주소를 복사했습니다
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 }

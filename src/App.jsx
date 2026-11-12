@@ -3,7 +3,6 @@ import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import Header from './components/Header';
 import FloatingBar from './components/FloatingBar';
 import Footer from './components/Footer';
-import Cursor from './components/motion/Cursor';
 import Home from './pages/Home';
 import About from './pages/About';
 import Curriculum from './pages/Curriculum';
@@ -11,7 +10,8 @@ import Event from './pages/Event';
 import Gallery from './pages/Gallery';
 import Location from './pages/Location';
 
-// 페이지 전환: 네이비 커튼이 아래에서 덮고, 새 페이지에서 위로 걷힙니다
+// 페이지 전환: 짧은 네이비 커튼 (0.3초 안팎). 내용을 오래 가리지 않습니다.
+const CURTAIN_EASE = [0.65, 0, 0.35, 1];
 function Page({ children }) {
   return (
     <motion.div>
@@ -19,14 +19,14 @@ function Page({ children }) {
       <motion.div
         className="fixed inset-0 z-[150] bg-navy-950 origin-top pointer-events-none"
         initial={{ scaleY: 1 }}
-        animate={{ scaleY: 0, transition: { duration: 0.95, ease: [0.65, 0, 0.35, 1], delay: 0.05 } }}
+        animate={{ scaleY: 0, transition: { duration: 0.35, ease: CURTAIN_EASE } }}
         exit={{ scaleY: 0 }}
       />
       <motion.div
         className="fixed inset-0 z-[150] bg-navy-950 origin-bottom pointer-events-none"
         initial={{ scaleY: 0 }}
         animate={{ scaleY: 0 }}
-        exit={{ scaleY: 1, transition: { duration: 0.65, ease: [0.65, 0, 0.35, 1] } }}
+        exit={{ scaleY: 1, transition: { duration: 0.25, ease: CURTAIN_EASE } }}
       />
     </motion.div>
   );
@@ -55,7 +55,6 @@ function App() {
           </Page>
         </AnimatePresence>
         <FloatingBar />
-        <Cursor />
       </div>
     </MotionConfig>
   );

@@ -22,13 +22,21 @@ const slide = {
 // Sanity의 gallery / event 문서를 불러와 사진 격자 + 보기 창으로 보여줍니다.
 export default function MediaGrid({ type }) {
   const [items, setItems] = useState(null);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [post, setPost] = useState(null);
   const [[idx, dir], setPage] = useState([0, 0]);
 
   useEffect(() => {
     const q = `*[_type == "${type}"] | order(publishedAt desc) { ..., "videoUrl": videoFile.asset->url }`;
-    client.fetch(q).then(setItems).catch(() => setItems([]));
-  }, [type]);
+    let alive = true;
+    client.fetch(q)
+      .then((r) => { if (alive) { setItems(r || []); setFailed(false); } })
+      .catch(() => { if (alive) setFailed(true); });
+    return () => { alive = false; };
+  }, [type, attempt]);
+
+  const retry = () => { setFailed(false); setItems(null); setAttempt((n) => n + 1); };
 
   const close = useCallback(() => setPost(null), []);
   const count = post?.images?.length || 0;
@@ -53,6 +61,16 @@ export default function MediaGrid({ type }) {
     }
   };
 
+  if (failed) {
+    return (
+      <div className="py-16 text-center" role="alert">
+        <p className="text-[17px] font-semibold">사진을 불러오지 못했습니다.</p>
+        <p className="mt-2 text-[15px] text-muted">인터넷 연결을 확인한 뒤 다시 시도해 주세요.</p>
+        <button type="button" onClick={retry} className="btn-ghost mt-6">다시 불러오기</button>
+      </div>
+    );
+  }
+
   if (items === null) {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
@@ -76,7 +94,6 @@ export default function MediaGrid({ type }) {
             <motion.button
               key={item._id}
               onClick={() => open(item)}
-              data-cursor={item.videoUrl ? '재생' : '보기'}
               className="group text-left"
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -95,13 +112,13 @@ export default function MediaGrid({ type }) {
                 <span className="absolute inset-0 bg-navy-950/0 group-hover:bg-navy-950/25 transition-colors duration-500" />
                 <span className="absolute left-0 bottom-0 h-[3px] w-full origin-left scale-x-0 bg-sun transition-transform duration-500 group-hover:scale-x-100" />
                 {item.videoUrl && (
-                  <span className="absolute left-3 top-3 bg-navy-950/85 text-white font-mono text-[11px] tracking-[0.12em] px-2 py-1 rounded">VIDEO</span>
+                  <span className="absolute left-3 top-3 bg-navy-950/85 text-white text-[12px] font-semibold px-2 py-1 rounded">영상</span>
                 )}
               </div>
               <div className="mt-3.5 flex items-baseline justify-between gap-3">
                 <p className="text-[15px] sm:text-[17px] font-semibold leading-snug group-hover:text-brand transition-colors">{item.title}</p>
                 {!item.videoUrl && item.images?.length > 1 && (
-                  <span className="font-mono shrink-0 text-[12px] text-muted">{String(item.images.length).padStart(2, '0')} P</span>
+                  <span className="shrink-0 text-[13px] text-muted num">{item.images.length}장</span>
                 )}
               </div>
             </motion.button>
@@ -130,8 +147,8 @@ export default function MediaGrid({ type }) {
               <p className="font-semibold truncate pr-4">{post.title}</p>
               <div className="flex items-center gap-4 shrink-0">
                 {!post.videoUrl && count > 1 && (
-                  <span className="font-mono text-white/60 text-[13px]">
-                    {String(idx + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
+                  <span className="num text-white/75 text-[14px]">
+                    {idx + 1} / {count}
                   </span>
                 )}
                 <button onClick={close} className="h-10 px-4 rounded border border-white/25 hover:border-white hover:bg-white hover:text-navy-950 transition-colors text-[14px]">

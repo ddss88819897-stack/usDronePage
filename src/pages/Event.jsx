@@ -5,8 +5,7 @@ import SectionHead from '../components/SectionHead';
 // Sanity 클라이언트는 이 페이지에서만 필요하므로 따로 불러옵니다
 const MediaGrid = lazy(() => import('../components/MediaGrid'));
 const GridFallback = () => <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="aspect-[4/3] bg-line animate-pulse" />)}</div>;
-import { MaskImage, Stagger, StaggerItem, Reveal, SplitText, Magnetic, HudCorners, DrawLine } from '../components/motion';
-import { SITE } from '../site';
+import { MaskImage, HudCorners } from '../components/motion';
 
 const BLOCKS = [
   {
@@ -30,7 +29,7 @@ const BLOCKS = [
 export default function Event() {
   return (
     <>
-      <PageHead no="02" en="Outreach & Events" title={['학교 수업부터 축제 공연까지,', '찾아가서 엽니다']}>
+      <PageHead title={['학교 수업부터 축제 공연까지,', '찾아가서 엽니다']}>
         학교, 교육청, 공공기관, 지자체에서 맡겨 주신 드론 수업과 행사를 기획부터 진행까지 맡습니다.
       </PageHead>
 
@@ -51,20 +50,13 @@ export default function Event() {
                 </MaskImage>
               </div>
               <div className={`lg:col-span-6 ${flip ? 'lg:order-1' : ''}`}>
-                <Reveal as="p" x={-12} y={0} className="eyebrow mb-5 flex items-center gap-3">
-                  <span className="text-sun">0{i + 1}</span><span className="h-px w-8 bg-ink/25" />{b.en}
-                </Reveal>
-                <SplitText lines={b.title} className="text-[32px] sm:text-[46px] leading-[1.18] font-bold" />
-                <Reveal as="p" delay={0.2} className="mt-6 text-[17px] leading-relaxed text-muted">{b.body}</Reveal>
-                <div className="mt-8"><DrawLine className="bg-ink" delay={0.2} /></div>
-                <Stagger as="ul" gap={0.08} delay={0.3}>
-                  {b.items.map((t, k) => (
-                    <StaggerItem as="li" key={t} className="group flex items-center gap-4 py-4 border-b border-line text-[16px]">
-                      <span className="font-mono text-[12px] text-muted group-hover:text-sun transition-colors">{String(k + 1).padStart(2, '0')}</span>
-                      <span className="transition-transform duration-500 group-hover:translate-x-2">{t}</span>
-                    </StaggerItem>
+                <h2 className="text-[32px] sm:text-[46px] leading-[1.18] font-bold">{b.title[0]}<br />{b.title[1]}</h2>
+                <p className="mt-6 text-[17px] leading-relaxed text-muted">{b.body}</p>
+                <ul className="mt-8 border-t border-ink">
+                  {b.items.map((t) => (
+                    <li key={t} className="py-4 border-b border-line text-[16px]">{t}</li>
                   ))}
-                </Stagger>
+                </ul>
               </div>
             </div>
           </section>
@@ -72,25 +64,10 @@ export default function Event() {
       })}
 
       <section className="wrap py-20 sm:py-28">
-        <SectionHead no="03" en="Portfolio" title={['최근 다녀온', '행사와 출강']} lede="사진을 누르면 크게 볼 수 있습니다. 여러 장이면 넘기거나 옆으로 밀어 보세요." />
+        <SectionHead title={['최근 다녀온', '행사와 출강']} lede="사진을 누르면 크게 볼 수 있습니다. 문의하실 때 날짜, 장소, 인원, 연령을 알려주시면 수업 구성과 견적을 보내드립니다." />
         <Suspense fallback={<GridFallback />}><MediaGrid type="event" /></Suspense>
       </section>
 
-      <section className="relative bg-navy-950 text-white overflow-hidden">
-        <div className="absolute inset-0 grid-bg opacity-60" />
-        <div className="absolute right-[-10%] top-[-30%] h-[500px] w-[500px] rounded-full bg-brand/30 blur-[120px]" />
-        <div className="relative wrap py-20 sm:py-24 grid lg:grid-cols-12 gap-8 lg:items-end">
-          <div className="lg:col-span-7">
-            <Reveal as="p" className="eyebrow-dark mb-5">Request — 출강·행사 문의</Reveal>
-            <SplitText lines={['행사 날짜와 장소를', '알려주세요']} className="text-[32px] sm:text-[48px] leading-[1.18] font-bold" />
-            <Reveal as="p" delay={0.2} className="mt-5 text-[17px] text-white/65 leading-relaxed">인원, 연령, 시간에 맞춰 수업 구성과 견적을 보내드립니다.</Reveal>
-          </div>
-          <Reveal delay={0.3} className="lg:col-span-5 flex flex-col sm:flex-row lg:justify-end gap-3">
-            <Magnetic><a href={SITE.kakao} target="_blank" rel="noopener noreferrer" className="btn-sun">카카오톡으로 문의 <span className="arrow">→</span></a></Magnetic>
-            <Magnetic><a href={`tel:${SITE.phone}`} className="btn-ghost-dark num">{SITE.phone}</a></Magnetic>
-          </Reveal>
-        </div>
-      </section>
     </>
   );
 }

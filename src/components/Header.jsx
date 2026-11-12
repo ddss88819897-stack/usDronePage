@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence, useScroll, useMotionValueEvent, useSpring } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'motion/react';
 import { NAV, SITE } from '../site';
 import { EASE } from './motion/config';
+import KakaoButton from './KakaoButton';
 
 export default function Header() {
   const { pathname } = useLocation();
@@ -11,8 +12,7 @@ export default function Header() {
   const open = openOn === pathname;
   const setOpen = (v) => setOpenOn(v ? pathname : null);
 
-  const { scrollY, scrollYProgress } = useScroll();
-  const progress = useSpring(scrollYProgress, { stiffness: 200, damping: 30 });
+  const { scrollY } = useScroll();
   const [solid, setSolid] = useState(false);
   const [hidden, setHidden] = useState(false);
   useMotionValueEvent(scrollY, 'change', (v) => {
@@ -39,10 +39,7 @@ export default function Header() {
             <span className="grid h-10 w-10 place-items-center rounded-full bg-white">
               <img src="/img/logo-256.png" alt="" className="h-9 w-9 object-contain" />
             </span>
-            <span className="leading-tight">
-              <span className="block text-[16px] font-bold tracking-tight">{SITE.name}</span>
-              <span className="hidden sm:block font-mono text-[10px] tracking-[0.18em] text-white/50">ULSAN DRONE ACADEMY</span>
-            </span>
+            <span className="text-[16px] font-bold tracking-tight">{SITE.name}</span>
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1 text-[15px] font-medium">
@@ -50,7 +47,7 @@ export default function Header() {
               <NavLink key={n.to} to={n.to} className="relative px-4 py-2">
                 {({ isActive }) => (
                   <>
-                    <span className={`relative z-10 transition-colors ${isActive ? 'text-white' : 'text-white/65 hover:text-white'}`}>{n.label}</span>
+                    <span className={`relative z-10 transition-colors ${isActive ? 'text-white' : 'text-white/75 hover:text-white'}`}>{n.label}</span>
                     {isActive && (
                       <motion.span
                         layoutId="nav-active"
@@ -65,9 +62,7 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <a href={SITE.kakao} target="_blank" rel="noopener noreferrer" className="hidden lg:inline-flex btn-sun h-10 px-5 text-[14px]">
-              수강 상담 <span className="arrow">→</span>
-            </a>
+            <KakaoButton className="hidden lg:inline-flex h-10 px-4 text-[14px]" />
             <button
               className="lg:hidden -mr-2 flex h-11 w-11 flex-col items-center justify-center gap-[6px]"
               onClick={() => setOpen(!open)}
@@ -80,37 +75,35 @@ export default function Header() {
             </button>
           </div>
         </div>
-        <motion.div className="absolute inset-x-0 bottom-0 h-[2px] origin-left bg-sun" style={{ scaleX: progress, opacity: solid ? 1 : 0 }} />
       </motion.header>
 
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-[90] bg-navy-950 grid-bg lg:hidden flex flex-col pt-24 pb-10 text-white"
+            className="fixed inset-0 z-[90] bg-navy-950 lg:hidden flex flex-col pt-24 pb-10 text-white"
             initial={{ clipPath: 'inset(0% 0% 100% 0%)' }}
             animate={{ clipPath: 'inset(0% 0% 0% 0%)' }}
             exit={{ clipPath: 'inset(0% 0% 100% 0%)' }}
-            transition={{ duration: 0.6, ease: EASE }}
+            transition={{ duration: 0.4, ease: EASE }}
           >
             <motion.nav
               className="wrap flex flex-col"
               initial="hidden"
               animate="show"
-              variants={{ show: { transition: { staggerChildren: 0.06, delayChildren: 0.2 } } }}
+              variants={{ show: { transition: { staggerChildren: 0.04, delayChildren: 0.1 } } }}
             >
-              {[{ to: '/', label: '홈' }, ...NAV].map((n, i) => (
+              {[{ to: '/', label: '홈' }, ...NAV].map((n) => (
                 <motion.div
                   key={n.to}
                   className="overflow-hidden border-b border-white/10"
-                  variants={{ hidden: { opacity: 0, y: 30 }, show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } } }}
+                  variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } } }}
                 >
                   <NavLink
                     to={n.to}
                     end
                     onClick={() => setOpen(false)}
-                    className={({ isActive }) => `flex items-baseline gap-4 py-4 ${isActive ? 'text-sun' : 'text-white'}`}
+                    className={({ isActive }) => `flex items-baseline py-4 ${isActive ? 'text-sun' : 'text-white'}`}
                   >
-                    <span className="font-mono text-[12px] text-white/40">0{i}</span>
                     <span className="text-[28px] font-bold tracking-tight">{n.label}</span>
                   </NavLink>
                 </motion.div>
@@ -119,10 +112,10 @@ export default function Header() {
             <motion.div
               className="wrap mt-auto grid gap-2"
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0, transition: { delay: 0.6, duration: 0.6, ease: EASE } }}
+              animate={{ opacity: 1, y: 0, transition: { delay: 0.3, duration: 0.4, ease: EASE } }}
             >
               <a href={`tel:${SITE.phone}`} className="btn-ghost-dark w-full num">전화 {SITE.phone}</a>
-              <a href={SITE.kakao} target="_blank" rel="noopener noreferrer" className="btn-kakao w-full">카카오톡 상담하기</a>
+              <KakaoButton className="w-full" />
             </motion.div>
           </motion.div>
         )}
